@@ -116,8 +116,12 @@ void MyCommandCallbacks::onWrite(BLECharacteristic *pCharacteristic) {
     
     if (type == "led_pattern") {
         handleLEDPattern(doc);
+    } else if (type == "workout_command") {
+        handleWorkoutCommand(doc);
     } else if (type == "get_status") {
         sendStatus();
+    } else if (type == "get_workout_status") {
+        sendWorkoutStatus();
     } else if (type == "ping") {
         sendPong();
     }
@@ -157,6 +161,53 @@ void MyCommandCallbacks::sendPong() {
         doc["type"] = "pong";
         doc["device_id"] = workoutDevice->getDeviceId();
         doc["timestamp"] = millis();
+        
+        bleManager->sendStatus(doc);
+    }
+}
+
+void MyCommandCallbacks::handleWorkoutCommand(const JsonDocument& doc) {
+    String action = doc["action"];
+    
+    if (action == "start") {
+        workoutDevice->startWorkout();
+    } else if (action == "stop") {
+        workoutDevice->stopWorkout();
+    } else if (action == "set_state") {
+        int state = doc["state"];
+        workoutDevice->setWorkoutState((WorkoutState)state);
+    } else if (action == "sync_pattern") {
+        // Coordinated pattern across devices
+        int deviceCount = doc["device_count"] | 1;
+        unsigned long timestamp = doc["timestamp"] | millis();
+        ledController->showSyncPattern(workoutDevice->getDeviceId(), deviceCount, timestamp);
+    } else if (action == "timer") {
+        int seconds = doc["seconds"] | 0;
+        int totalSeconds = doc["total_seconds"] | 60;
+        ledController->showTimer(seconds, totalSeconds);
+    } else if (action == "intensity") {
+        int level = doc["level"] | 5;
+        ledController->showIntensity(level);
+    }
+    
+    // Send acknowledgment
+    JsonDocument response;
+    response["type"] = "workout_ack";
+    response["action"] = action;
+    response["device_id"] = workoutDevice->getDeviceId();
+    
+    bleManager->sendStatus(response);
+}
+
+void MyCommandCallbacks::sendWorkoutStatus() {
+    if (workoutDevice) {
+        JsonDocument doc;
+        doc["type"] = "workout_status";
+        doc["device_id"] = workoutDevice->getDeviceId();
+        doc["state"] = workoutDevice->getWorkoutState();
+        doc["workout_time"] = workoutDevice->getWorkoutTime();
+        doc["calories"] = workoutDevice->getCaloriesBurned();
+        doc["battery"] = workoutDevice->getBatteryLevel();
         
         bleManager->sendStatus(doc);
     }

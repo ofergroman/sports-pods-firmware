@@ -64,6 +64,15 @@ LEDPattern LEDController::stringToPattern(const String& patternStr) {
     if (patternStr == "chase") return PATTERN_CHASE;
     if (patternStr == "rainbow") return PATTERN_RAINBOW;
     if (patternStr == "off") return PATTERN_OFF;
+    // Sports patterns
+    if (patternStr == "warmup") return PATTERN_WARMUP;
+    if (patternStr == "pulse") return PATTERN_PULSE;
+    if (patternStr == "breathing") return PATTERN_BREATHING;
+    if (patternStr == "timer") return PATTERN_TIMER;
+    if (patternStr == "intensity") return PATTERN_INTENSITY;
+    if (patternStr == "rest") return PATTERN_REST;
+    if (patternStr == "celebration") return PATTERN_CELEBRATION;
+    if (patternStr == "wave") return PATTERN_WAVE;
     return PATTERN_UNKNOWN;
 }
 
@@ -136,6 +145,79 @@ void LEDController::executePattern(LEDPattern pattern, uint32_t color, int durat
             Serial.println("LEDs turned off");
             break;
             
+        case PATTERN_WARMUP:
+            // Gentle orange pulsing
+            Serial.println("Warmup pattern - gentle orange pulse...");
+            for (int intensity = 50; intensity <= 150; intensity += 10) {
+                for (int i = 0; i < NUM_LEDS; i++) {
+                    strip.setPixelColor(i, strip.Color(intensity, intensity/2, 0));
+                }
+                strip.show();
+                delay(50);
+            }
+            for (int intensity = 150; intensity >= 50; intensity -= 10) {
+                for (int i = 0; i < NUM_LEDS; i++) {
+                    strip.setPixelColor(i, strip.Color(intensity, intensity/2, 0));
+                }
+                strip.show();
+                delay(50);
+            }
+            break;
+            
+        case PATTERN_PULSE:
+            // Rhythmic pulsing for active workout
+            Serial.println("Pulse pattern - active workout...");
+            for (int pulse = 0; pulse < 5; pulse++) {
+                for (int i = 0; i < NUM_LEDS; i++) {
+                    strip.setPixelColor(i, strip.Color(r, g, b));
+                }
+                strip.show();
+                delay(200);
+                strip.clear();
+                strip.show();
+                delay(200);
+            }
+            break;
+            
+        case PATTERN_BREATHING:
+            // Slow breathing pattern for rest/meditation
+            Serial.println("Breathing pattern - rest/meditation...");
+            for (int breath = 0; breath < 3; breath++) {
+                // Inhale
+                for (int intensity = 0; intensity <= 100; intensity += 5) {
+                    for (int i = 0; i < NUM_LEDS; i++) {
+                        strip.setPixelColor(i, strip.Color(0, 0, intensity));
+                    }
+                    strip.show();
+                    delay(80);
+                }
+                // Exhale
+                for (int intensity = 100; intensity >= 0; intensity -= 5) {
+                    for (int i = 0; i < NUM_LEDS; i++) {
+                        strip.setPixelColor(i, strip.Color(0, 0, intensity));
+                    }
+                    strip.show();
+                    delay(80);
+                }
+            }
+            break;
+            
+        case PATTERN_CELEBRATION:
+            // Victory celebration pattern
+            Serial.println("Celebration pattern - workout complete!");
+            for (int cycle = 0; cycle < 3; cycle++) {
+                for (int j = 0; j < 256; j += 8) {
+                    for (int i = 0; i < NUM_LEDS; i++) {
+                        strip.setPixelColor(i, Wheel((i + j) & 255));
+                    }
+                    strip.show();
+                    delay(20);
+                }
+            }
+            strip.clear();
+            strip.show();
+            break;
+            
         default:
             Serial.printf("Unknown pattern\n");
             break;
@@ -154,4 +236,96 @@ uint32_t LEDController::Wheel(byte WheelPos) {
     }
     WheelPos -= 170;
     return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
+
+void LEDController::showWorkoutState(int workoutState) {
+    switch (workoutState) {
+        case 0: // WORKOUT_IDLE
+            clear();
+            break;
+        case 1: // WORKOUT_WARMUP
+            executePattern(PATTERN_WARMUP, 0xFF8000, 1000); // Orange
+            break;
+        case 2: // WORKOUT_ACTIVE
+            executePattern(PATTERN_PULSE, 0xFF0000, 1000); // Red
+            break;
+        case 3: // WORKOUT_REST
+            executePattern(PATTERN_BREATHING, 0x0000FF, 2000); // Blue
+            break;
+        case 4: // WORKOUT_COOLDOWN
+            executePattern(PATTERN_BREATHING, 0x00FF00, 3000); // Green
+            break;
+        case 5: // WORKOUT_COMPLETE
+            executePattern(PATTERN_CELEBRATION, 0xFFFFFF, 3000); // Rainbow
+            break;
+    }
+}
+
+void LEDController::showTimer(int seconds, int totalSeconds) {
+    // Show countdown timer as LED progress
+    int ledsOn = map(seconds, 0, totalSeconds, 0, NUM_LEDS);
+    
+    strip.clear();
+    for (int i = 0; i < ledsOn; i++) {
+        if (seconds <= 10) {
+            // Red for last 10 seconds
+            strip.setPixelColor(i, strip.Color(255, 0, 0));
+        } else if (seconds <= 30) {
+            // Yellow for last 30 seconds
+            strip.setPixelColor(i, strip.Color(255, 255, 0));
+        } else {
+            // Green for normal time
+            strip.setPixelColor(i, strip.Color(0, 255, 0));
+        }
+    }
+    strip.show();
+}
+
+void LEDController::showIntensity(int level) {
+    // Show intensity level (1-10) as colored LEDs
+    int ledsOn = map(level, 1, 10, 1, NUM_LEDS);
+    
+    strip.clear();
+    for (int i = 0; i < ledsOn; i++) {
+        if (level <= 3) {
+            // Green for low intensity
+            strip.setPixelColor(i, strip.Color(0, 255, 0));
+        } else if (level <= 7) {
+            // Yellow for medium intensity
+            strip.setPixelColor(i, strip.Color(255, 255, 0));
+        } else {
+            // Red for high intensity
+            strip.setPixelColor(i, strip.Color(255, 0, 0));
+        }
+    }
+    strip.show();
+}
+
+void LEDController::showCaloriesBurned(int calories) {
+    // Flash green once for every 10 calories
+    int flashes = calories / 10;
+    for (int i = 0; i < flashes && i < 5; i++) {
+        for (int j = 0; j < NUM_LEDS; j++) {
+            strip.setPixelColor(j, strip.Color(0, 255, 0));
+        }
+        strip.show();
+        delay(200);
+        strip.clear();
+        strip.show();
+        delay(200);
+    }
+}
+
+void LEDController::showSyncPattern(int deviceId, int totalDevices, unsigned long timestamp) {
+    // Synchronized wave pattern across all devices
+    unsigned long phase = (timestamp / 100) % 360; // 100ms per degree
+    int offset = (deviceId - 1) * (360 / totalDevices); // Distribute devices around circle
+    
+    for (int i = 0; i < NUM_LEDS; i++) {
+        int ledPhase = (phase + offset + (i * 22)) % 360; // 22 degrees per LED
+        int intensity = (sin(ledPhase * PI / 180) + 1) * 127; // 0-255 range
+        
+        strip.setPixelColor(i, strip.Color(intensity, 0, 255 - intensity));
+    }
+    strip.show();
 }

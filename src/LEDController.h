@@ -12,6 +12,15 @@ enum LEDPattern {
     PATTERN_CHASE,
     PATTERN_RAINBOW,
     PATTERN_OFF,
+    // Sports/Workout patterns
+    PATTERN_WARMUP,
+    PATTERN_PULSE,
+    PATTERN_BREATHING,
+    PATTERN_TIMER,
+    PATTERN_INTENSITY,
+    PATTERN_REST,
+    PATTERN_CELEBRATION,
+    PATTERN_WAVE,
     PATTERN_UNKNOWN
 };
 
@@ -23,6 +32,13 @@ public:
     void setPattern(LEDPattern pattern, uint32_t color = 0xFF0000, int duration = 1000);
     void showDeviceStartup(uint8_t deviceId);
     void clear();
+    
+    // Sports/Workout specific patterns
+    void showWorkoutState(int workoutState);
+    void showTimer(int seconds, int totalSeconds);
+    void showIntensity(int level); // 1-10 intensity
+    void showCaloriesBurned(int calories);
+    void showSyncPattern(int deviceId, int totalDevices, unsigned long timestamp);
     
 private:
     LEDPattern stringToPattern(const String& patternStr);

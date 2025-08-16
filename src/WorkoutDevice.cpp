@@ -6,7 +6,9 @@
 #define ROLE_PIN 2  // D2 pin for device ID detection
 
 WorkoutDevice::WorkoutDevice() 
-    : deviceId(0), batteryLevel(85), lastBatteryUpdate(0) {
+    : deviceId(0), batteryLevel(85), lastBatteryUpdate(0),
+      workoutState(WORKOUT_IDLE), workoutStartTime(0), workoutTime(0),
+      lastStateChange(0), caloriesBurned(0), repCount(0) {
 }
 
 void WorkoutDevice::begin() {
@@ -27,6 +29,7 @@ void WorkoutDevice::begin() {
 
 void WorkoutDevice::loop() {
     updateBatteryLevel();
+    updateWorkoutTimer();
     delay(100);
 }
 
@@ -65,4 +68,47 @@ void WorkoutDevice::determineDeviceId() {
     Serial.printf("Device ID: %d, Name: %s\n", deviceId, deviceName.c_str());
     Serial.printf("MAC Address: %02X:%02X:%02X:%02X:%02X:%02X\n", 
                  mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+}
+
+void WorkoutDevice::startWorkout() {
+    workoutState = WORKOUT_WARMUP;
+    workoutStartTime = millis();
+    workoutTime = 0;
+    caloriesBurned = 0;
+    repCount = 0;
+    lastStateChange = millis();
+    
+    Serial.println("Workout started - entering warmup phase");
+    ledController.showWorkoutState(workoutState);
+}
+
+void WorkoutDevice::stopWorkout() {
+    workoutState = WORKOUT_IDLE;
+    workoutTime = 0;
+    lastStateChange = millis();
+    
+    Serial.println("Workout stopped");
+    ledController.clear();
+}
+
+void WorkoutDevice::setWorkoutState(WorkoutState state) {
+    workoutState = state;
+    lastStateChange = millis();
+    
+    Serial.printf("Workout state changed to: %d\n", state);
+    ledController.showWorkoutState(state);
+}
+
+void WorkoutDevice::updateWorkoutTimer() {
+    if (workoutState != WORKOUT_IDLE) {
+        workoutTime = (millis() - workoutStartTime) / 1000; // Convert to seconds
+        
+        // Simulate calorie burn (very basic)
+        if (workoutState == WORKOUT_ACTIVE) {
+            if (millis() - lastStateChange > 5000) { // Every 5 seconds
+                caloriesBurned += 1;
+                lastStateChange = millis();
+            }
+        }
+    }
 }

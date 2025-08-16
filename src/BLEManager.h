@@ -56,8 +56,10 @@ public:
     
 private:
     void handleLEDPattern(const JsonDocument& doc);
+    void handleWorkoutCommand(const JsonDocument& doc);
     void sendStatus();
     void sendPong();
+    void sendWorkoutStatus();
     
     BLEManager* bleManager;
     LEDController* ledController;
