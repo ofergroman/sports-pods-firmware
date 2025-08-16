@@ -1,0 +1,187 @@
+# PlatformIO Commands and Setup Guide
+# Model Context Protocol (MCP) File for ESP32 Workout Pod System
+# Created: June 9, 2025
+
+## Project Information
+- **Project Name**: ESP32 Workout Pod System
+- **Platform**: ESP32-C6 (Seeed XIAO ESP32C6)
+- **Framework**: Arduino
+- **Project Path**: /Users/ofergroman/Documents/PlatformIO/Projects/whatever
+
+## PlatformIO Installation Status
+- **PlatformIO Installed**: Yes
+- **PlatformIO Path**: /Users/ofergroman/.platformio/penv/bin/platformio
+- **Python Version**: 3.13.2
+- **Shell**: zsh (macOS)
+
+## How to Run PlatformIO Commands
+
+### Method 1: Full Path (Always Works)
+```bash
+cd /Users/ofergroman/Documents/PlatformIO/Projects/whatever
+~/.platformio/penv/bin/platformio run
+```
+
+### Method 2: Add to PATH (Recommended)
+Add this to ~/.zshrc:
+```bash
+export PATH="$HOME/.platformio/penv/bin:$PATH"
+```
+Then reload shell: `source ~/.zshrc`
+
+### Method 3: Create Alias
+Add to ~/.zshrc:
+```bash
+alias pio='~/.platformio/penv/bin/platformio'
+```
+
+## Common PlatformIO Commands
+
+### Build Commands
+```bash
+# Compile the project
+~/.platformio/penv/bin/platformio run
+
+# Clean build files
+~/.platformio/penv/bin/platformio run --target clean
+
+# Build and upload to device
+~/.platformio/penv/bin/platformio run --target upload
+
+# Build specific environment
+~/.platformio/penv/bin/platformio run -e seeed_xiao_esp32c6
+```
+
+### Monitoring Commands
+```bash
+# Open serial monitor
+~/.platformio/penv/bin/platformio device monitor
+
+# Monitor with specific port
+~/.platformio/penv/bin/platformio device monitor --port /dev/cu.usbmodem*
+
+# Monitor with custom baud rate
+~/.platformio/penv/bin/platformio device monitor --baud 115200
+```
+
+### Library Management
+```bash
+# Install library
+~/.platformio/penv/bin/platformio lib install "Adafruit NeoPixel"
+
+# Update libraries
+~/.platformio/penv/bin/platformio lib update
+
+# List installed libraries
+~/.platformio/penv/bin/platformio lib list
+```
+
+### Device Management
+```bash
+# List connected devices
+~/.platformio/penv/bin/platformio device list
+
+# Upload via OTA (if configured)
+~/.platformio/penv/bin/platformio run -t upload --upload-port 192.168.1.100
+```
+
+### Debug and Development
+```bash
+# Check project configuration
+~/.platformio/penv/bin/platformio project config
+
+# Update platform packages
+~/.platformio/penv/bin/platformio platform update
+
+# Install missing dependencies
+~/.platformio/penv/bin/platformio lib install
+```
+
+## Project-Specific Information
+
+### Board Configuration
+- **Board**: seeed_xiao_esp32c6
+- **Platform**: https://github.com/pioarduino/platform-espressif32/releases/download/stable/platform-espressif32.zip
+- **Monitor Speed**: 115200
+- **Partition Scheme**: huge_app.csv
+
+### Dependencies
+- Adafruit NeoPixel ^1.12.5
+- Adafruit ADXL345 ^1.3.4
+- Adafruit Unified Sensor ^1.1.15
+
+### Build Flags
+- Core Debug Level: 3
+- USB Mode: 1
+- USB CDC on Boot: 1
+
+### Key Files
+- **Main Source**: src/main.cpp
+- **Configuration**: platformio.ini
+- **Libraries**: lib/
+- **Include**: include/
+
+## Device Roles (Hardware Configuration)
+- **Hub Device**: D2 pin connected to GND via cable
+- **Child Device**: D2 pin floating (no cable)
+
+## Common Workflows
+
+### 1. Build and Test
+```bash
+cd /Users/ofergroman/Documents/PlatformIO/Projects/whatever
+~/.platformio/penv/bin/platformio run
+~/.platformio/penv/bin/platformio run --target upload
+~/.platformio/penv/bin/platformio device monitor
+```
+
+### 2. Clean Build (if issues)
+```bash
+~/.platformio/penv/bin/platformio run --target clean
+~/.platformio/penv/bin/platformio run
+```
+
+### 3. OTA Update (if implemented)
+```bash
+~/.platformio/penv/bin/platformio run -t upload --upload-port [IP_ADDRESS]
+```
+
+## Troubleshooting
+
+### If "command not found: pio"
+- Use full path: `~/.platformio/penv/bin/platformio`
+- Or add to PATH as shown above
+
+### If upload fails
+- Check USB connection
+- Verify correct port in platformio.ini
+- Try pressing reset button during upload
+
+### If libraries missing
+```bash
+~/.platformio/penv/bin/platformio lib install
+```
+
+### If platform issues
+```bash
+~/.platformio/penv/bin/platformio platform update espressif32
+```
+
+## VS Code Integration
+If using VS Code with PlatformIO extension:
+- Commands available via Command Palette (Cmd+Shift+P)
+- Bottom toolbar has PlatformIO buttons
+- Auto-completion and IntelliSense enabled
+
+## Environment Variables
+```bash
+# Optional: Set PLATFORMIO_CORE_DIR
+export PLATFORMIO_CORE_DIR="$HOME/.platformio"
+
+# Optional: Set custom upload port
+export PLATFORMIO_UPLOAD_PORT="/dev/cu.usbmodem14301"
+```
+
+---
+**Note**: Always run commands from the project directory for proper context.
+**Last Updated**: June 9, 2025

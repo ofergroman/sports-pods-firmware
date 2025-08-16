@@ -1,0 +1,22 @@
+{
+    "files.associations": {
+        "*.mcp": "markdown"
+    },
+    "search.include": {
+        "**/*.mcp": true
+    },
+    "files.exclude": {},
+    "github.copilot.chat.mcp.servers": [
+        {
+            "name": "PlatformIO Commands",
+            "path": "./platformio_commands.mcp",
+            "description": "ESP32 workout pod system build and development commands"
+        }
+    ],
+    "cline.mcpServers": [
+        {
+            "name": "PlatformIO Commands",
+            "path": "./platformio_commands.mcp"
+        }
+    ]
+}

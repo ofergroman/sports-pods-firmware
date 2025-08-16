@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../../Projects/whatever/expo-ble-sample"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.mcp": "markdown"
+		}
+	}
+}
