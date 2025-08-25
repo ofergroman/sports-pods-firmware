@@ -40,6 +40,15 @@ public:
     void showCaloriesBurned(int calories);
     void showSyncPattern(int deviceId, int totalDevices, unsigned long timestamp);
     
+    // Reactive training patterns
+    void showActiveTarget();    // Bright flashing for tap target
+    void showSuccess();         // Green flash for successful tap
+    void showMissed();          // Red flash for missed tap
+    void showWaiting();         // Dim pattern while waiting
+    
+    // Power management
+    void setBrightness(uint8_t brightness);
+    
 private:
     LEDPattern stringToPattern(const String& patternStr);
     void executePattern(LEDPattern pattern, uint32_t color, int duration);

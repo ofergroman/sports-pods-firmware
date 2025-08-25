@@ -258,6 +258,19 @@ void LEDController::showWorkoutState(int workoutState) {
         case 5: // WORKOUT_COMPLETE
             executePattern(PATTERN_CELEBRATION, 0xFFFFFF, 3000); // Rainbow
             break;
+        // Reactive training states
+        case 6: // REACTIVE_WAITING
+            showWaiting();
+            break;
+        case 7: // REACTIVE_ACTIVE
+            // This is handled by showActiveTarget() when called
+            break;
+        case 8: // REACTIVE_SUCCESS
+            // This is handled by showSuccess() when called
+            break;
+        case 9: // REACTIVE_MISSED
+            // This is handled by showMissed() when called
+            break;
     }
 }
 
@@ -328,4 +341,59 @@ void LEDController::showSyncPattern(int deviceId, int totalDevices, unsigned lon
         strip.setPixelColor(i, strip.Color(intensity, 0, 255 - intensity));
     }
     strip.show();
+}
+
+// Reactive Training LED Methods
+void LEDController::showActiveTarget() {
+    // Immediately show bright blue target color - no delays!
+    for (int i = 0; i < NUM_LEDS; i++) {
+        strip.setPixelColor(i, COLOR_BLUE); // Bright blue for visibility
+    }
+    strip.show();
+}
+
+void LEDController::showSuccess() {
+    // Solid green for successful tap - clean feedback
+    for (int i = 0; i < NUM_LEDS; i++) {
+        strip.setPixelColor(i, COLOR_GREEN);
+    }
+    strip.show();
+    delay(300); // Brief solid green display
+    
+    // Then turn off
+    for (int i = 0; i < NUM_LEDS; i++) {
+        strip.setPixelColor(i, COLOR_OFF);
+    }
+    strip.show();
+}
+
+void LEDController::showMissed() {
+    // Red flash for missed tap - quick feedback
+    for (int flash = 0; flash < 2; flash++) {
+        for (int i = 0; i < NUM_LEDS; i++) {
+            strip.setPixelColor(i, COLOR_RED);
+        }
+        strip.show();
+        delay(100);
+        
+        for (int i = 0; i < NUM_LEDS; i++) {
+            strip.setPixelColor(i, COLOR_OFF);
+        }
+        strip.show();
+        delay(50);
+    }
+}
+
+void LEDController::showWaiting() {
+    // Turn off all LEDs while waiting for next activation
+    for (int i = 0; i < NUM_LEDS; i++) {
+        strip.setPixelColor(i, COLOR_OFF);
+    }
+    strip.show();
+}
+
+void LEDController::setBrightness(uint8_t brightness) {
+    // Set brightness for power management (0-255)
+    strip.setBrightness(brightness);
+    strip.show(); // Apply the brightness change immediately
 }

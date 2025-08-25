@@ -23,6 +23,7 @@ public:
     void begin(const String& deviceName, WorkoutDevice* device, LEDController* ledController);
     void sendStatus(const JsonDocument& statusDoc);
     void sendDeviceInfo(uint8_t deviceId, const String& deviceName, uint8_t batteryLevel);
+    void notifyTapResult(bool success, uint16_t reactionTime);
     bool isConnected() const { return deviceConnected; }
     
 private:

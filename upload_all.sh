@@ -4,7 +4,7 @@
 # Usage: ./upload_all.sh
 
 echo "Building firmware..."
-platformio run --environment workout_device
+~/.platformio/penv/bin/platformio run --environment workout_device
 
 if [ $? -ne 0 ]; then
     echo "❌ Build failed! Exiting."
@@ -43,7 +43,7 @@ for device in "${DEVICES[@]}"; do
     echo ""
     echo "📤 Uploading to $device..."
     
-    platformio run --environment workout_device --target upload --upload-port "$device"
+    ~/.platformio/penv/bin/platformio run --environment workout_device --target upload --upload-port "$device"
     
     if [ $? -eq 0 ]; then
         echo "✅ Successfully uploaded to $device"

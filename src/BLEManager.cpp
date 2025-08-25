@@ -73,6 +73,17 @@ void BLEManager::sendDeviceInfo(uint8_t deviceId, const String& deviceName, uint
     sendStatus(doc);
 }
 
+void BLEManager::notifyTapResult(bool success, uint16_t reactionTime) {
+    JsonDocument doc;
+    doc["type"] = "tap_result";
+    doc["device_id"] = workoutDevice->getDeviceId();
+    doc["success"] = success;
+    doc["reaction_time"] = reactionTime;
+    doc["timestamp"] = millis();
+    
+    sendStatus(doc);
+}
+
 // Server Callbacks Implementation
 void MyServerCallbacks::onConnect(BLEServer* pServer) {
     bleManager->deviceConnected = true;
@@ -189,6 +200,21 @@ void MyCommandCallbacks::handleWorkoutCommand(const JsonDocument& doc) {
         int level = doc["level"] | 5;
         ledController->showIntensity(level);
     }
+    // Reactive training commands
+    else if (action == "start_reactive") {
+        workoutDevice->startReactiveTraining();
+    } else if (action == "stop_reactive") {
+        workoutDevice->stopReactiveTraining();
+    } else if (action == "activate_for_tap") {
+        int timeout = doc["timeout"] | TAP_TIMEOUT_MS; // Use provided timeout or default
+        workoutDevice->activateForTap(timeout);
+    } else if (action == "deactivate_for_tap") {
+        workoutDevice->deactivateForTap();
+    } else if (action == "enable_debug") {
+        workoutDevice->enableDebugMode();
+    } else if (action == "disable_debug") {
+        workoutDevice->disableDebugMode();
+    }
     
     // Send acknowledgment
     JsonDocument response;
@@ -208,6 +234,11 @@ void MyCommandCallbacks::sendWorkoutStatus() {
         doc["workout_time"] = workoutDevice->getWorkoutTime();
         doc["calories"] = workoutDevice->getCaloriesBurned();
         doc["battery"] = workoutDevice->getBatteryLevel();
+        
+        // Add reactive training stats
+        doc["reaction_time"] = workoutDevice->getReactionTime();
+        doc["success_count"] = workoutDevice->getSuccessCount();
+        doc["missed_count"] = workoutDevice->getMissedCount();
         
         bleManager->sendStatus(doc);
     }
